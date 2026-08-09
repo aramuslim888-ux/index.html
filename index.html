@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kurdish 3D Car Racing - By Aro Bestoon</title>
+    <title>Kurdish GTA Style Open World - By Aro Bestoon</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
         * {
             box-sizing: border-box;
             margin: 0;
@@ -17,7 +17,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #0b0f19;
+            background-color: #050505;
             color: #fff;
         }
         .screen {
@@ -30,7 +30,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: radial-gradient(circle, #1a233a 0%, #0b0f19 100%);
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1920&q=80') no-repeat center center/cover;
             z-index: 10;
             padding: 20px;
         }
@@ -38,73 +38,79 @@
             display: none !important;
         }
         h1 {
-            font-size: 2.2rem;
-            margin-bottom: 15px;
-            color: #f39c12;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: #f1c40f;
             text-align: center;
-            text-shadow: 0 2px 10px rgba(243, 156, 18, 0.4);
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.9);
+            font-weight: 900;
+            letter-spacing: 1px;
         }
         .author-text {
-            font-size: 1.1rem;
-            margin-bottom: 25px;
-            color: #00cec9;
-            background: rgba(0, 206, 201, 0.1);
-            border: 1px solid #00cec9;
-            padding: 8px 25px;
-            border-radius: 30px;
-            box-shadow: 0 0 15px rgba(0, 206, 201, 0.2);
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #00e1D9;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #00e1D9;
+            padding: 8px 30px;
+            border-radius: 40px;
+            box-shadow: 0 0 20px rgba(0, 225, 217, 0.4);
+            font-weight: bold;
         }
         .btn {
-            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
-            border: none;
-            padding: 14px 35px;
-            font-size: 1.1rem;
+            border: 2px solid #fff;
+            padding: 15px 45px;
+            font-size: 1.2rem;
             font-weight: bold;
-            border-radius: 30px;
+            border-radius: 8px;
             cursor: pointer;
-            margin: 8px;
+            margin: 10px;
             transition: 0.3s;
-            box-shadow: 0 5px 20px rgba(255, 65, 108, 0.4);
-            width: 250px;
+            box-shadow: 0 5px 20px rgba(231, 76, 60, 0.5);
+            width: 280px;
             text-align: center;
+            letter-spacing: 1px;
         }
         .btn:hover {
+            background: linear-gradient(135deg, #ff5252, #e74c3c);
             transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(255, 65, 108, 0.6);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.8);
         }
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
             width: 100%;
-            max-width: 800px;
-            margin-top: 15px;
+            max-width: 900px;
+            margin-top: 20px;
         }
         .card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(52, 152, 219, 0.5);
+            background: rgba(15, 15, 15, 0.85);
+            border: 2px solid #f1c40f;
             padding: 25px 15px;
-            border-radius: 20px;
+            border-radius: 12px;
             cursor: pointer;
             text-align: center;
             transition: 0.3s;
             backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
         }
         .card:hover {
-            background: rgba(52, 152, 219, 0.2);
-            border-color: #3498db;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+            background: rgba(241, 196, 15, 0.2);
+            border-color: #fff;
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(241, 196, 15, 0.4);
         }
         .card h3 {
-            color: #3498db;
-            font-size: 1.4rem;
+            color: #f1c40f;
+            font-size: 1.5rem;
             margin-bottom: 8px;
         }
         .card p {
-            color: #ccc;
-            font-size: 0.95rem;
+            color: #ddd;
+            font-size: 1rem;
         }
         #game-container {
             width: 100%;
@@ -116,7 +122,7 @@
             width: 100%;
             height: 100%;
         }
-        /* Modern Controls Layout */
+        /* GTA Style Controls Layout */
         .controls-left {
             position: absolute;
             bottom: 30px;
@@ -134,38 +140,40 @@
             z-index: 5;
         }
         .ctrl-btn {
-            width: 75px;
-            height: 75px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.6);
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid rgba(255, 255, 255, 0.8);
             border-radius: 50%;
-            font-size: 2rem;
+            font-size: 2.2rem;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             backdrop-filter: blur(8px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
             transition: 0.1s;
         }
         .ctrl-btn:active {
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0.95);
+            background: rgba(241, 196, 15, 0.7);
+            border-color: #f1c40f;
+            transform: scale(0.92);
         }
         #hud {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 10px 20px;
-            border-radius: 12px;
+            top: 25px;
+            right: 25px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #f1c40f;
+            padding: 12px 25px;
+            border-radius: 10px;
             z-index: 5;
             letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            color: #f1c40f;
         }
     </style>
 </head>
@@ -176,12 +184,12 @@
         <source src="https://ia801502.us.archive.org/15/items/KurdishMusic/HassanZirak.mp3" type="audio/mp3">
     </audio>
 
-    <!-- Main Menu Screen -->
+    <!-- Main Menu Screen (GTA Style) -->
     <div id="main-menu" class="screen">
-        <h1>یاری سەیارەی کوردی (سلێمانی و هەولێر)</h1>
+        <h1>یاری جیهانی کراوەی کوردی (GTA Style)</h1>
         <div class="author-text">دروست کراوە لە لایەن ئارۆ بێستون</div>
-        <button class="btn" onclick="openCarSelect()">Start / دەستپێک</button>
-        <button class="btn" onclick="toggleSettings()">Settings / ڕێکخستن</button>
+        <button class="btn" onclick="openCarSelect()">دەستپێک / Start</button>
+        <button class="btn" onclick="toggleSettings()">ڕێکخستن / Settings</button>
     </div>
 
     <!-- Settings Screen -->
@@ -191,36 +199,36 @@
         <button class="btn" onclick="toggleSettings()">گەڕانەوە</button>
     </div>
 
-    <!-- Car Selection Screen -->
+    <!-- Car Selection Screen (Kurdish Cars added) -->
     <div id="car-screen" class="screen hidden">
-        <h1>سەیارەیەک هەڵبژێرە</h1>
+        <h1>سەیارەیەکی کوردی هەڵبژێرە</h1>
         <div class="grid-container">
             <div class="card" onclick="selectCar('BMW')">
-                <h3>BMW 3 Series</h3>
-                <p>خێرا و وەرزشی</p>
+                <h3>BMW E30 (جمال)</h3>
+                <p>خێرا، وەرزشی و تایبەت بە شەقامەکان</p>
             </div>
             <div class="card" onclick="selectCar('Camry')">
-                <h3>Toyota Camry</h3>
-                <p>هاوسەنگ و نەرم</p>
+                <h3>Toyota Camry 2024</h3>
+                <p>هاوسەنگ، مۆدێرن و تایبەت بە شار</p>
             </div>
             <div class="card" onclick="selectCar('Patrol')">
-                <h3>Nissan Patrol</h3>
-                <p>بەهێز و قورس</p>
+                <h3>Nissan Patrol (سفاري)</h3>
+                <p>بەهێز، پڕ توانا بۆ هەموو ڕێڕەوێک</p>
             </div>
         </div>
     </div>
 
-    <!-- Map Selection Screen -->
+    <!-- Map Selection Screen (Sulaymaniyah & Erbil) -->
     <div id="map-screen" class="screen hidden">
         <h1>شارێک هەڵبژێرە بۆ لێخوڕین</h1>
         <div class="grid-container">
             <div class="card" onclick="startGame('Sulaymaniyah')">
-                <h3>سلێمانی</h3>
-                <p>شەقام و باڵەخانەکانی سلێمانی</p>
+                <h3>سلێمانی (چیا و بازاڕ)</h3>
+                <p>شەقامەکانی سەرچنار، ئەزمەڕ و باڵەخانەکان</p>
             </div>
             <div class="card" onclick="startGame('Erbil')">
-                <h3>هەولێر</h3>
-                <p>قەڵا و شەقامە سەرەکییەکان</p>
+                <h3>هەولێر (قەڵا و شەقڵاوە)</h3>
+                <p>شەقامی سەرەکی، قەڵای هەولێر و شوقەکان</p>
             </div>
         </div>
     </div>
@@ -290,49 +298,51 @@
 
         function init3DGame() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(selectedMapType === 'Sulaymaniyah' ? 0x1e272e : 0x2f3640);
+            scene.background = new THREE.Color(selectedMapType === 'Sulaymaniyah' ? 0x0f172a : 0x1e1b4b);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById('game-container').appendChild(renderer.domElement);
 
-            let ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            let ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             scene.add(ambientLight);
-            let dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(10, 20, 10);
+            let dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            dirLight.position.set(20, 40, 20);
             scene.add(dirLight);
 
-            // Ground
-            let groundGeo = new THREE.PlaneGeometry(1000, 1000);
-            let groundMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            // Detailed Road System (Open World GTA Style)
+            let groundGeo = new THREE.PlaneGeometry(2000, 2000);
+            let groundMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
             let ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             scene.add(ground);
 
-            // Buildings
-            let buildingMat = new THREE.MeshStandardMaterial({ color: 0x57606f });
-            for(let i = -50; i <= 50; i += 15) {
-                let bHeight = Math.random() * 20 + 10;
-                let bGeo = new THREE.BoxGeometry(8, bHeight, 8);
+            // Detailed Kurdish City Buildings (Erbil & Sulaymaniyah Apartments / Landmarks)
+            let buildingMat = new THREE.MeshStandardMaterial({ color: 0x374151, roughness: 0.5 });
+            let glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1 });
+            
+            for(let i = -100; i <= 100; i += 20) {
+                let bHeight = Math.random() * 30 + 15;
+                let bGeo = new THREE.BoxGeometry(10, bHeight, 10);
                 let bMesh = new THREE.Mesh(bGeo, buildingMat);
-                bMesh.position.set(i, bHeight/2, -25);
+                bMesh.position.set(i, bHeight/2, -35);
                 scene.add(bMesh);
 
                 let bMesh2 = new THREE.Mesh(bGeo, buildingMat);
-                bMesh2.position.set(i, bHeight/2, 25);
+                bMesh2.position.set(i, bHeight/2, 35);
                 scene.add(bMesh2);
             }
 
-            // Car Model
-            let carGeo = new THREE.BoxGeometry(2, 1, 4);
-            let carColor = selectedCarType === 'BMW' ? 0x3498db : (selectedCarType === 'Camry' ? 0xf1f2f6 : 0xe67e22);
-            let carMat = new THREE.MeshStandardMaterial({ color: carColor });
+            // Real GTA Style Car Body Construction based on selection
+            let carGeo = new THREE.BoxGeometry(2.2, 1.2, 4.5);
+            let carColor = selectedCarType === 'BMW' ? 0xdc2626 : (selectedCarType === 'Camry' ? 0xf8fafc : 0x1e293b);
+            let carMat = new THREE.MeshStandardMaterial({ color: carColor, metalness: 0.7, roughness: 0.3 });
             carMesh = new THREE.Mesh(carGeo, carMat);
-            carMesh.position.set(0, 0.5, 0);
+            carMesh.position.set(0, 0.6, 0);
             scene.add(carMesh);
 
-            camera.position.set(0, 5, -8);
+            camera.position.set(0, 6, -10);
             camera.lookAt(carMesh.position);
         }
 
@@ -340,26 +350,28 @@
             if (!isPlaying) return;
             requestAnimationFrame(animate);
 
-            carSpeed += throttle * 0.1;
-            carSpeed *= 0.98;
+            // GTA SA style smooth physics and weight handling
+            carSpeed += throttle * 0.12;
+            carSpeed *= 0.97; // Natural friction
 
-            if (carSpeed > 1.2) carSpeed = 1.2;
-            if (carSpeed < -0.4) carSpeed = -0.4;
+            if (carSpeed > 1.5) carSpeed = 1.5;
+            if (carSpeed < -0.5) carSpeed = -0.5;
 
             if (steering !== 0 && Math.abs(carSpeed) > 0.05) {
-                carMesh.rotation.y -= steering * 0.03 * (carSpeed > 0 ? 1 : -1);
+                carMesh.rotation.y -= steering * 0.035 * (carSpeed > 0 ? 1 : -1);
             }
 
             let angle = carMesh.rotation.y;
             carMesh.position.x += Math.sin(angle) * carSpeed;
             carMesh.position.z += Math.cos(angle) * carSpeed;
 
-            camera.position.x = carMesh.position.x - Math.sin(angle) * 8;
-            camera.position.z = carMesh.position.z - Math.cos(angle) * 8;
-            camera.position.y = carMesh.position.y + 4;
+            // Smooth GTA Camera Follow
+            camera.position.x = carMesh.position.x - Math.sin(angle) * 9;
+            camera.position.z = carMesh.position.z - Math.cos(angle) * 9;
+            camera.position.y = carMesh.position.y + 4.5;
             camera.lookAt(carMesh.position);
 
-            document.getElementById('speed').innerText = Math.round(Math.abs(carSpeed) * 60);
+            document.getElementById('speed').innerText = Math.round(Math.abs(carSpeed) * 65);
 
             renderer.render(scene, camera);
         }
