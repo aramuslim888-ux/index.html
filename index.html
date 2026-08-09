@@ -229,27 +229,25 @@
     <div id="game-container" class="hidden">
         <div id="hud">Speed: <span id="speed">0</span> km/h</div>
         
-        <!-- Left Side: Correct Left & Right Steering -->
+        <!-- Left Side: Steering -->
         <div class="controls-left">
             <div class="ctrl-btn" ontouchstart="setSteering(-1)" ontouchend="setSteering(0)" onmousedown="setSteering(-1)" onmouseup="setSteering(0)">⬅️</div>
             <div class="ctrl-btn" ontouchstart="setSteering(1)" ontouchend="setSteering(0)" onmousedown="setSteering(1)" onmouseup="setSteering(0)">➡️</div>
         </div>
 
-        <!-- Right Side: Throttle on top, Brake on bottom -->
+        <!-- Right Side: Throttle & Brake -->
         <div class="controls-right">
             <div class="ctrl-btn" ontouchstart="setThrottle(1)" ontouchend="setThrottle(0)" onmousedown="setThrottle(1)" onmouseup="setThrottle(0)">⬆️</div>
             <div class="ctrl-btn" ontouchstart="setThrottle(-1)" ontouchend="setThrottle(0)" onmousedown="setThrottle(-1)" onmouseup="setThrottle(0)">⬇️</div>
         </div>
     </div>
 
-    <!-- Three.js Library & OrbitControls for Camera Rotation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script>
         let music = document.getElementById('bg-music');
         let selectedCarType = '';
         let selectedMapType = '';
-        let scene, camera, renderer, carGroup, controls;
+        let scene, camera, renderer, carGroup;
         let throttle = 0, steering = 0, carSpeed = 0;
         let isPlaying = false;
 
@@ -293,33 +291,26 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById('game-container').appendChild(renderer.domElement);
 
-            // Orbit Controls so user can rotate camera around car
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-
-            let ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            let ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
             scene.add(ambientLight);
-            let dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            let dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
             dirLight.position.set(30, 60, 30);
             scene.add(dirLight);
 
-            // Detailed Visible Road & Ground
+            // Ground & Road
             let groundGeo = new THREE.PlaneGeometry(3000, 3000);
             let groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
             let ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             scene.add(ground);
 
-            // Main Asphalt Road with markings
             let roadGeo = new THREE.PlaneGeometry(16, 3000);
-            let roadMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.6 });
+            let roadMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
             let road = new THREE.Mesh(roadGeo, roadMat);
             road.rotation.x = -Math.PI / 2;
             road.position.y = 0.02;
             scene.add(road);
 
-            // Road Divider Lines
             for(let z = -1500; z < 1500; z += 15) {
                 let lineGeo = new THREE.PlaneGeometry(0.4, 6);
                 let lineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
@@ -329,22 +320,25 @@
                 scene.add(line);
             }
 
-            // Visible City Buildings along the road
-            let bMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
-            for(let i = -150; i <= 150; i += 30) {
-                if (Math.abs(i) < 20) continue;
-                let h1 = Math.random() * 40 + 20;
-                let b1 = new THREE.Mesh(new THREE.BoxGeometry(14, h1, 14), bMat);
-                b1.position.set(i, h1/2, -50);
+            // High-End Modern Kurdish Towers & Glass Apartments (GTA Style)
+            let towerMat1 = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.2, metalness: 0.8 }); // Glass Tower
+            let towerMat2 = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.4, metalness: 0.5 }); // Modern Concrete/Stone
+
+            for(let i = -160; i <= 160; i += 28) {
+                if (Math.abs(i) < 22) continue;
+                
+                let h1 = Math.random() * 50 + 30; // Much taller buildings
+                let b1 = new THREE.Mesh(new THREE.BoxGeometry(16, h1, 16), i % 2 === 0 ? towerMat1 : towerMat2);
+                b1.position.set(i, h1/2, -55);
                 scene.add(b1);
 
-                let h2 = Math.random() * 40 + 20;
-                let b2 = new THREE.Mesh(new THREE.BoxGeometry(14, h2, 14), bMat);
-                b2.position.set(i, h2/2, 50);
+                let h2 = Math.random() * 50 + 30;
+                let b2 = new THREE.Mesh(new THREE.BoxGeometry(16, h2, 16), i % 2 !== 0 ? towerMat1 : towerMat2);
+                b2.position.set(i, h2/2, 55);
                 scene.add(b2);
             }
 
-            // Detailed 3D Car Model
+            // Car Model
             carGroup = new THREE.Group();
             let colorVal = selectedCarType === 'BMW' ? 0xdc2626 : (selectedCarType === 'Camry' ? 0xf8fafc : 0x2563eb);
             
@@ -362,7 +356,6 @@
             cabin.position.set(0, 1.2, -0.2);
             carGroup.add(cabin);
 
-            // Wheels
             let wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 16);
             let wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
             let wheelPositions = [
@@ -378,9 +371,6 @@
 
             carGroup.position.set(0, 0, 0);
             scene.add(carGroup);
-
-            camera.position.set(0, 5, -10);
-            controls.target.copy(carGroup.position);
         }
 
         function animate() {
@@ -401,9 +391,18 @@
             carGroup.position.x += Math.sin(angle) * carSpeed;
             carGroup.position.z += Math.cos(angle) * carSpeed;
 
-            // Update camera target to follow car smoothly while allowing user rotation
-            controls.target.copy(carGroup.position);
-            controls.update();
+            // Camera Follow
+            let camDist = 9;
+            let camHeight = 4;
+            camera.position.x = carGroup.position.x - Math.sin(angle) * camDist;
+            camera.position.z = carGroup.position.z - Math.cos(angle) * camDist;
+            camera.position.y = carGroup.position.y + camHeight;
+            
+            camera.lookAt(
+                carGroup.position.x + Math.sin(angle) * 2,
+                carGroup.position.y + 1,
+                carGroup.position.z + Math.cos(angle) * 2
+            );
 
             document.getElementById('speed').innerText = Math.round(Math.abs(carSpeed) * 65);
 
