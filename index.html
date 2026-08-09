@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kurdish GTA SA Style - By Aro Bestoon</title>
+    <title>Kurdish GTA SA - CJ Style - By Aro Bestoon</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; user-select: none; }
@@ -40,11 +40,11 @@
         #action-btn {
             position: absolute; bottom: 110px; right: 35px; width: 85px; height: 85px;
             background: linear-gradient(135deg, #2563eb, #1d4ed8); border: 3px solid #fff; border-radius: 50%;
-            font-size: 1rem; font-weight: bold; color: white; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 5; box-shadow: 0 5px 20px rgba(37, 99, 235, 0.6);
+            font-size: 0.9rem; font-weight: bold; color: white; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 5; box-shadow: 0 5px 20px rgba(37, 99, 235, 0.6); text-align: center;
         }
         #hud {
-            position: absolute; top: 20px; right: 20px; font-size: 1.2rem; font-weight: bold;
+            position: absolute; top: 20px; right: 20px; font-size: 1.1rem; font-weight: bold;
             background: rgba(0, 0, 0, 0.8); border: 2px solid #f1c40f; padding: 10px 20px;
             border-radius: 10px; z-index: 5; color: #f1c40f; direction: ltr;
         }
@@ -57,15 +57,15 @@
     </audio>
 
     <div id="main-menu" class="screen">
-        <h1>یاری جیهانی کوردی (GTA SA Style)</h1>
+        <h1>یاری کوردی (GTA SA - CJ Style)</h1>
         <div class="author-text">دروست کراوە لە لایەن ئارۆ بێستون</div>
         <button class="btn" onclick="startGame()">دەستپێک / Start Game</button>
     </div>
 
     <div id="game-container" class="hidden">
-        <div id="hud">Mode: <span id="mode-text">Driving</span> | Speed: <span id="speed">0</span> km/h</div>
+        <div id="hud">Mode: <span id="mode-text">پیادە (CJ)</span> | Speed: <span id="speed">0</span></div>
         
-        <div id="action-btn" onclick="toggleEnterExit()">سوار/دابەزین</div>
+        <div id="action-btn" onclick="toggleEnterExit()">سوار / دابەزین</div>
 
         <div class="controls-left">
             <div class="ctrl-btn" ontouchstart="setMove(-1, 0)" ontouchend="setMove(0, 0)" onmousedown="setMove(-1, 0)" onmouseup="setMove(0, 0)">⬅️</div>
@@ -82,10 +82,11 @@
     <script>
         let music = document.getElementById('bg-music');
         let scene, camera, renderer;
-        let carGroup, playerGroup;
-        let isDriving = true;
+        let carGroup, cjGroup;
+        let leftLeg, rightLeg; // بۆ جووڵەی قاچەکان لە کاتی پیاسەدا
+        let isDriving = false;
         let moveX = 0, moveY = 0, carSpeed = 0;
-        let isPlaying = false;
+        let isPlaying = false, walkCycle = 0;
 
         function startGame() {
             music.play().catch(e => {});
@@ -122,7 +123,7 @@
             road.position.y = 0.02;
             scene.add(road);
 
-            // Glass Towers (GTA Style buildings)
+            // Modern Buildings / Towers
             let glassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, metalness: 0.9 });
             for(let i = -180; i <= 180; i += 30) {
                 if (Math.abs(i) < 25) continue;
@@ -135,7 +136,7 @@
                 scene.add(b2);
             }
 
-            // Create Car
+            // Create Detailed Car Model
             carGroup = new THREE.Group();
             let body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 4.6), new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.8 }));
             body.position.y = 0.6;
@@ -143,36 +144,66 @@
             let cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.6, 2.3), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
             cabin.position.set(0, 1.2, -0.2);
             carGroup.add(cabin);
-            carGroup.position.set(0, 0, 0);
+            carGroup.position.set(0, 0, 10);
             scene.add(carGroup);
 
-            // Create Player (CJ Style)
-            playerGroup = new THREE.Group();
-            let pBody = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.6, 0.5), new THREE.MeshStandardMaterial({ color: 0x16a34a }));
-            pBody.position.y = 0.8;
-            playerGroup.add(pBody);
-            playerGroup.position.set(3, 0, 2);
-            playerGroup.visible = false;
-            scene.add(playerGroup);
+            // Create Realistic CJ Character (Head, Torso, Arms, Legs)
+            cjGroup = new THREE.Group();
+            
+            // Skin & Clothes Materials
+            let skinMat = new THREE.MeshStandardMaterial({ color: 0x8d5524 }); // پێست
+            let shirtMat = newTHREE.MeshStandardMaterial({ color: 0x16a34a }); // تیشێرت سەوز (CJ Style)
+            let jeansMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8 }); // پانتۆڵی جینز
+
+            // Head
+            let head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), skinMat);
+            head.position.y = 1.65;
+            cjGroup.add(head);
+
+            // Torso (Body)
+            let torso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.7, 0.3), shirtMat);
+            torso.position.y = 1.15;
+            cjGroup.add(torso);
+
+            // Arms
+            let leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), shirtMat);
+            leftArm.position.set(-0.4, 1.15, 0);
+            cjGroup.add(leftArm);
+
+            let rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), shirtMat);
+            rightArm.position.set(0.4, 1.15, 0);
+            cjGroup.add(rightArm);
+
+            // Legs (جیاواز بۆ ئەوەی لە کاتی پیاسەدا جووڵەیان پێ بکەین)
+            leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.7, 0.22), jeansMat);
+            leftLeg.position.set(-0.15, 0.45, 0);
+            cjGroup.add(leftLeg);
+
+            rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.7, 0.22), jeansMat);
+            rightLeg.position.set(0.15, 0.45, 0);
+            cjGroup.add(rightLeg);
+
+            cjGroup.position.set(0, 0, 0);
+            scene.add(cjGroup);
         }
 
         function toggleEnterExit() {
             if (isDriving) {
-                // Get out of car
+                // دابەزین لە سەیارە
                 isDriving = false;
-                playerGroup.position.set(carGroup.position.x + 2, 0, carGroup.position.z);
-                playerGroup.rotation.y = carGroup.rotation.y;
-                playerGroup.visible = true;
-                document.getElementById('mode-text').innerText = "On Foot (پیاده)";
+                cjGroup.position.set(carGroup.position.x + 2.5, 0, carGroup.position.z);
+                cjGroup.rotation.y = carGroup.rotation.y;
+                cjGroup.visible = true;
+                document.getElementById('mode-text').innerText = "پیادە (CJ)";
             } else {
-                // Get into car if close
-                let dist = playerGroup.position.distanceTo(carGroup.position);
-                if (dist < 5) {
+                // سواربوون لە سەیارە ئەگەر نزیک بێت
+                let dist = cjGroup.position.distanceTo(carGroup.position);
+                if (dist < 6) {
                     isDriving = true;
-                    playerGroup.visible = false;
-                    document.getElementById('mode-text').innerText = "Driving (سەیارە)";
+                    cjGroup.visible = false;
+                    document.getElementById('mode-text').innerText = "شۆفێری سەیارە";
                 } else {
-                    alert("سەیارەکە دوورە لێتەوە!");
+                    alert("سەیارەکە زۆر دوورە! لێی نزیک ببەرەوە.");
                 }
             }
         }
@@ -182,6 +213,7 @@
             requestAnimationFrame(animate);
 
             if (isDriving) {
+                // کۆنتڕۆڵی سەیارە
                 carSpeed += moveY * 0.14;
                 carSpeed *= 0.95;
                 if (carSpeed > 1.8) carSpeed = 1.8;
@@ -195,7 +227,7 @@
                 carGroup.position.x += Math.sin(angle) * carSpeed;
                 carGroup.position.z += Math.cos(angle) * carSpeed;
 
-                // Camera follow car
+                // کامێرای دواوەی سەیارە
                 let targetX = carGroup.position.x - Math.sin(angle) * 10;
                 let targetZ = carGroup.position.z - Math.cos(angle) * 10;
                 camera.position.x += (targetX - camera.position.x) * 0.15;
@@ -203,27 +235,36 @@
                 camera.position.z += (targetZ - camera.position.z) * 0.15;
                 camera.lookAt(carGroup.position.x, carGroup.position.y + 1, carGroup.position.z);
 
-                document.getElementById('speed').innerText = Math.round(Math.abs(carSpeed) * 65);
+                document.getElementById('speed').innerText = Math.round(Math.abs(carSpeed) * 65) + " km/h";
             } else {
-                // On foot movement
-                let walkSpeed = 0.1;
+                // کۆنتڕۆڵی کەسایەتی (CJ) بە قاچ و دەست و پیاسەکردن
+                let walkSpeed = 0.12;
                 if (moveY !== 0) {
-                    playerGroup.position.x += Math.sin(playerGroup.rotation.y) * moveY * walkSpeed;
-                    playerGroup.position.z += Math.cos(playerGroup.rotation.y) * moveY * walkSpeed;
+                    cjGroup.position.x += Math.sin(cjGroup.rotation.y) * moveY * walkSpeed;
+                    cjGroup.position.z += Math.cos(cjGroup.rotation.y) * moveY * walkSpeed;
+
+                    // سیستەمی جووڵاندنی قاچ و دەستەکان وەک پیاسەکردنی ڕاستەقینە
+                    walkCycle += 0.2;
+                    leftLeg.rotation.x = Math.sin(walkCycle) * 0.6;
+                    rightLeg.rotation.x = -Math.sin(walkCycle) * 0.6;
+                } else {
+                    leftLeg.rotation.x = 0;
+                    rightLeg.rotation.x = 0;
                 }
+
                 if (moveX !== 0) {
-                    playerGroup.rotation.y -= moveX * 0.05;
+                    cjGroup.rotation.y -= moveX * 0.05;
                 }
 
-                // Camera follow player
-                let pX = playerGroup.position.x - Math.sin(playerGroup.rotation.y) * 6;
-                let pZ = playerGroup.position.z - Math.cos(playerGroup.rotation.y) * 6;
+                // کامێرای دواوەی CJ
+                let pX = cjGroup.position.x - Math.sin(cjGroup.rotation.y) * 6;
+                let pZ = cjGroup.position.z - Math.cos(cjGroup.rotation.y) * 6;
                 camera.position.x += (pX - camera.position.x) * 0.15;
-                camera.position.y = playerGroup.position.y + 3;
+                camera.position.y = cjGroup.position.y + 2.5;
                 camera.position.z += (pZ - camera.position.z) * 0.15;
-                camera.lookAt(playerGroup.position.x, playerGroup.position.y + 1, playerGroup.position.z);
+                camera.lookAt(cjGroup.position.x, cjGroup.position.y + 1.2, cjGroup.position.z);
 
-                document.getElementById('speed').innerText = "0";
+                document.getElementById('speed').innerText = "0 km/h";
             }
 
             renderer.render(scene, camera);
