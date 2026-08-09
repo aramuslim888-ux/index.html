@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kurdish 3D Car Racing - By Aro Bestoon</title>
+    <title>Kurdish GTA Style Open World - By Aro Bestoon</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
         * {
@@ -30,7 +30,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #111, #1a2530);
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
             z-index: 10;
             padding: 20px;
         }
@@ -42,7 +42,7 @@
             margin-bottom: 15px;
             color: #f1c40f;
             text-align: center;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.9);
             font-weight: 900;
         }
         .author-text {
@@ -116,41 +116,42 @@
             height: 100%;
         }
         
-        /* Strict Control Layout (Left: Steering, Right: Throttle) */
+        /* GTA Accurate Control Layout */
         .controls-left {
             position: absolute;
-            bottom: 30px;
-            left: 30px;
+            bottom: 25px;
+            left: 25px;
             display: flex;
             gap: 15px;
             z-index: 5;
         }
         .controls-right {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
+            bottom: 25px;
+            right: 25px;
             display: flex;
-            gap: 15px;
+            flex-direction: column;
+            gap: 12px;
             z-index: 5;
         }
         .ctrl-btn {
-            width: 75px;
-            height: 75px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 3px solid rgba(255, 255, 255, 0.8);
+            width: 70px;
+            height: 70px;
+            background: rgba(0, 0, 0, 0.65);
+            border: 3px solid rgba(255, 255, 255, 0.85);
             border-radius: 50%;
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             backdrop-filter: blur(5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
         }
         .ctrl-btn:active {
-            background: rgba(241, 196, 15, 0.8);
-            transform: scale(0.95);
+            background: rgba(241, 196, 15, 0.85);
+            transform: scale(0.92);
         }
         #hud {
             position: absolute;
@@ -215,7 +216,7 @@
         <div class="grid-container">
             <div class="card" onclick="startGame('Sulaymaniyah')">
                 <h3>سلێمانی</h3>
-                <p>شەقام و باڵەخانەکانی سلێمانی</p>
+                <p>شەقام، سەرچنار و باڵەخانەکان</p>
             </div>
             <div class="card" onclick="startGame('Erbil')">
                 <h3>هەولێر</h3>
@@ -228,25 +229,27 @@
     <div id="game-container" class="hidden">
         <div id="hud">Speed: <span id="speed">0</span> km/h</div>
         
-        <!-- Left Side: Steering Controls (⬅️ ➡️) -->
+        <!-- Left Side: Correct Left & Right Steering -->
         <div class="controls-left">
             <div class="ctrl-btn" ontouchstart="setSteering(-1)" ontouchend="setSteering(0)" onmousedown="setSteering(-1)" onmouseup="setSteering(0)">⬅️</div>
             <div class="ctrl-btn" ontouchstart="setSteering(1)" ontouchend="setSteering(0)" onmousedown="setSteering(1)" onmouseup="setSteering(0)">➡️</div>
         </div>
 
-        <!-- Right Side: Throttle & Brake Controls (⬇️ ⬆️) -->
+        <!-- Right Side: Throttle on top, Brake on bottom -->
         <div class="controls-right">
-            <div class="ctrl-btn" ontouchstart="setThrottle(-1)" ontouchend="setThrottle(0)" onmousedown="setThrottle(-1)" onmouseup="setThrottle(0)">⬇️</div>
             <div class="ctrl-btn" ontouchstart="setThrottle(1)" ontouchend="setThrottle(0)" onmousedown="setThrottle(1)" onmouseup="setThrottle(0)">⬆️</div>
+            <div class="ctrl-btn" ontouchstart="setThrottle(-1)" ontouchend="setThrottle(0)" onmousedown="setThrottle(-1)" onmouseup="setThrottle(0)">⬇️</div>
         </div>
     </div>
 
+    <!-- Three.js Library & OrbitControls for Camera Rotation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script>
         let music = document.getElementById('bg-music');
         let selectedCarType = '';
         let selectedMapType = '';
-        let scene, camera, renderer, carGroup;
+        let scene, camera, renderer, carGroup, controls;
         let throttle = 0, steering = 0, carSpeed = 0;
         let isPlaying = false;
 
@@ -283,89 +286,101 @@
 
         function init3DGame() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(selectedMapType === 'Sulaymaniyah' ? 0x111827 : 0x1f1f38);
+            scene.background = new THREE.Color(0x0f172a);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById('game-container').appendChild(renderer.domElement);
 
-            let ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+            // Orbit Controls so user can rotate camera around car
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            let ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             scene.add(ambientLight);
             let dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            dirLight.position.set(20, 50, 20);
+            dirLight.position.set(30, 60, 30);
             scene.add(dirLight);
 
-            // Ground & Road
+            // Detailed Visible Road & Ground
             let groundGeo = new THREE.PlaneGeometry(3000, 3000);
-            let groundMat = new THREE.MeshStandardMaterial({ color: 0x1f1f1f, roughness: 0.9 });
+            let groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
             let ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             scene.add(ground);
 
-            // Detailed Buildings (City Style)
-            let bMat1 = new THREE.MeshStandardMaterial({ color: 0x374151 });
-            let bMat2 = new THREE.MeshStandardMaterial({ color: 0x4b5563 });
-            for(let i = -120; i <= 120; i += 25) {
-                let h1 = Math.random() * 35 + 15;
-                let mesh1 = new THREE.Mesh(new THREE.BoxGeometry(12, h1, 12), bMat1);
-                mesh1.position.set(i, h1/2, -40);
-                scene.add(mesh1);
+            // Main Asphalt Road with markings
+            let roadGeo = new THREE.PlaneGeometry(16, 3000);
+            let roadMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.6 });
+            let road = new THREE.Mesh(roadGeo, roadMat);
+            road.rotation.x = -Math.PI / 2;
+            road.position.y = 0.02;
+            scene.add(road);
 
-                let h2 = Math.random() * 35 + 15;
-                let mesh2 = new THREE.Mesh(new THREE.BoxGeometry(12, h2, 12), bMat2);
-                mesh2.position.set(i, h2/2, 40);
-                scene.add(mesh2);
+            // Road Divider Lines
+            for(let z = -1500; z < 1500; z += 15) {
+                let lineGeo = new THREE.PlaneGeometry(0.4, 6);
+                let lineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+                let line = new THREE.Mesh(lineGeo, lineMat);
+                line.rotation.x = -Math.PI / 2;
+                line.position.set(0, 0.03, z);
+                scene.add(line);
             }
 
-            // Real Detailed 3D Car Model (Instead of simple box)
+            // Visible City Buildings along the road
+            let bMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
+            for(let i = -150; i <= 150; i += 30) {
+                if (Math.abs(i) < 20) continue;
+                let h1 = Math.random() * 40 + 20;
+                let b1 = new THREE.Mesh(new THREE.BoxGeometry(14, h1, 14), bMat);
+                b1.position.set(i, h1/2, -50);
+                scene.add(b1);
+
+                let h2 = Math.random() * 40 + 20;
+                let b2 = new THREE.Mesh(new THREE.BoxGeometry(14, h2, 14), bMat);
+                b2.position.set(i, h2/2, 50);
+                scene.add(b2);
+            }
+
+            // Detailed 3D Car Model
             carGroup = new THREE.Group();
+            let colorVal = selectedCarType === 'BMW' ? 0xdc2626 : (selectedCarType === 'Camry' ? 0xf8fafc : 0x2563eb);
             
-            let colorVal = selectedCarType === 'BMW' ? 0xef4444 : (selectedCarType === 'Camry' ? 0xf8fafc : 0x3b82f6);
-            
-            // Car Body Main
-            let bodyGeo = new THREE.BoxGeometry(2.2, 0.8, 4.5);
-            let bodyMat = new THREE.MeshStandardMaterial({ color: colorVal, metalness: 0.8, roughness: 0.2 });
-            let body = new THREE.Mesh(bodyGeo, bodyMat);
+            let body = new THREE.Mesh(
+                new THREE.BoxGeometry(2.2, 0.8, 4.6),
+                new THREE.MeshStandardMaterial({ color: colorVal, metalness: 0.8, roughness: 0.2 })
+            );
             body.position.y = 0.6;
             carGroup.add(body);
 
-            // Car Cabin (Top roof)
-            let cabinGeo = new THREE.BoxGeometry(1.8, 0.6, 2.2);
-            let cabinMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
-            let cabin = new THREE.Mesh(cabinGeo, cabinMat);
+            let cabin = new THREE.Mesh(
+                new THREE.BoxGeometry(1.8, 0.6, 2.3),
+                new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.1 })
+            );
             cabin.position.set(0, 1.2, -0.2);
             carGroup.add(cabin);
 
             // Wheels
             let wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 16);
-            let wheelMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
-            
-            let w1 = new THREE.Mesh(wheelGeo, wheelMat);
-            w1.rotation.z = Math.PI / 2;
-            w1.position.set(-1.1, 0.4, 1.4);
-            carGroup.add(w1);
-
-            let w2 = new THREE.Mesh(wheelGeo, wheelMat);
-            w2.rotation.z = Math.PI / 2;
-            w2.position.set(1.1, 0.4, 1.4);
-            carGroup.add(w2);
-
-            let w3 = new THREE.Mesh(wheelGeo, wheelMat);
-            w3.rotation.z = Math.PI / 2;
-            w3.position.set(-1.1, 0.4, -1.4);
-            carGroup.add(w3);
-
-            let w4 = new THREE.Mesh(wheelGeo, wheelMat);
-            w4.rotation.z = Math.PI / 2;
-            w4.position.set(1.1, 0.4, -1.4);
-            carGroup.add(w4);
+            let wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+            let wheelPositions = [
+                [-1.1, 0.4, 1.4], [1.1, 0.4, 1.4],
+                [-1.1, 0.4, -1.4], [1.1, 0.4, -1.4]
+            ];
+            wheelPositions.forEach(pos => {
+                let w = new THREE.Mesh(wheelGeo, wheelMat);
+                w.rotation.z = Math.PI / 2;
+                w.position.set(...pos);
+                carGroup.add(w);
+            });
 
             carGroup.position.set(0, 0, 0);
             scene.add(carGroup);
 
-            camera.position.set(0, 6, -10);
-            camera.lookAt(carGroup.position);
+            camera.position.set(0, 5, -10);
+            controls.target.copy(carGroup.position);
         }
 
         function animate() {
@@ -373,24 +388,22 @@
             requestAnimationFrame(animate);
 
             carSpeed += throttle * 0.12;
-            carSpeed *= 0.96; // Friction
+            carSpeed *= 0.96;
 
             if (carSpeed > 1.6) carSpeed = 1.6;
             if (carSpeed < -0.5) carSpeed = -0.5;
 
             if (steering !== 0 && Math.abs(carSpeed) > 0.05) {
-                carGroup.rotation.y -= steering * 0.035 * (carSpeed > 0 ? 1 : -1);
+                carGroup.rotation.y += steering * 0.035 * (carSpeed > 0 ? 1 : -1);
             }
 
             let angle = carGroup.rotation.y;
             carGroup.position.x += Math.sin(angle) * carSpeed;
             carGroup.position.z += Math.cos(angle) * carSpeed;
 
-            // Camera follow
-            camera.position.x = carGroup.position.x - Math.sin(angle) * 9;
-            camera.position.z = carGroup.position.z - Math.cos(angle) * 9;
-            camera.position.y = carGroup.position.y + 4.5;
-            camera.lookAt(carGroup.position);
+            // Update camera target to follow car smoothly while allowing user rotation
+            controls.target.copy(carGroup.position);
+            controls.update();
 
             document.getElementById('speed').innerText = Math.round(Math.abs(carSpeed) * 65);
 
