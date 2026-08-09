@@ -5,17 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kurdish 3D Car Racing - By Aro Bestoon</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: 'Vazirmatn', sans-serif;
+            user-select: none;
         }
         body, html {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #111;
+            background-color: #0b0f19;
             color: #fff;
         }
         .screen {
@@ -28,60 +30,81 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            background: radial-gradient(circle, #1a233a 0%, #0b0f19 100%);
             z-index: 10;
+            padding: 20px;
         }
         .hidden {
             display: none !important;
         }
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
             color: #f39c12;
             text-align: center;
+            text-shadow: 0 2px 10px rgba(243, 156, 18, 0.4);
         }
         .author-text {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
             color: #00cec9;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 20px;
-            border-radius: 20px;
+            background: rgba(0, 206, 201, 0.1);
+            border: 1px solid #00cec9;
+            padding: 8px 25px;
+            border-radius: 30px;
+            box-shadow: 0 0 15px rgba(0, 206, 201, 0.2);
         }
         .btn {
-            background-color: #e74c3c;
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
             color: white;
             border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
+            padding: 14px 35px;
+            font-size: 1.1rem;
+            font-weight: bold;
             border-radius: 30px;
             cursor: pointer;
-            margin: 10px;
+            margin: 8px;
             transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            box-shadow: 0 5px 20px rgba(255, 65, 108, 0.4);
+            width: 250px;
+            text-align: center;
         }
         .btn:hover {
-            background-color: #c0392b;
             transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 65, 108, 0.6);
         }
-        .car-select-container, .map-select-container {
-            display: flex;
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
-            margin-top: 20px;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 15px;
         }
         .card {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #3498db;
-            padding: 20px;
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(52, 152, 219, 0.5);
+            padding: 25px 15px;
+            border-radius: 20px;
             cursor: pointer;
             text-align: center;
-            width: 200px;
             transition: 0.3s;
+            backdrop-filter: blur(10px);
         }
         .card:hover {
-            background: rgba(52, 152, 219, 0.3);
+            background: rgba(52, 152, 219, 0.2);
+            border-color: #3498db;
             transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+        }
+        .card h3 {
+            color: #3498db;
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+        .card p {
+            color: #ccc;
+            font-size: 0.95rem;
         }
         #game-container {
             width: 100%;
@@ -93,7 +116,7 @@
             width: 100%;
             height: 100%;
         }
-        /* UI Controls Layout */
+        /* Modern Controls Layout */
         .controls-left {
             position: absolute;
             bottom: 30px;
@@ -107,37 +130,42 @@
             bottom: 30px;
             right: 30px;
             display: flex;
-            flex-direction: column;
             gap: 15px;
             z-index: 5;
         }
         .ctrl-btn {
-            width: 70px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.3);
-            border: 2px solid #fff;
+            width: 75px;
+            height: 75px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.6);
             border-radius: 50%;
-            font-size: 1.8rem;
+            font-size: 2rem;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            user-select: none;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: 0.1s;
         }
         .ctrl-btn:active {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0.95);
         }
         #hud {
             position: absolute;
             top: 20px;
             left: 20px;
-            font-size: 1.2rem;
-            background: rgba(0,0,0,0.6);
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255,255,255,0.2);
             padding: 10px 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             z-index: 5;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -160,13 +188,13 @@
     <div id="settings-screen" class="screen hidden">
         <h1>ڕێکخستنی دەنگ</h1>
         <button class="btn" onclick="toggleAudio()">کۆنتڕۆڵی دەنگ (لێدەر/کوژێنەرەوە)</button>
-        <button class="btn" onclick="closeSettings()">گەڕانەوە</button>
+        <button class="btn" onclick="toggleSettings()">گەڕانەوە</button>
     </div>
 
     <!-- Car Selection Screen -->
     <div id="car-screen" class="screen hidden">
         <h1>سەیارەیەک هەڵبژێرە</h1>
-        <div class="car-select-container">
+        <div class="grid-container">
             <div class="card" onclick="selectCar('BMW')">
                 <h3>BMW 3 Series</h3>
                 <p>خێرا و وەرزشی</p>
@@ -185,10 +213,10 @@
     <!-- Map Selection Screen -->
     <div id="map-screen" class="screen hidden">
         <h1>شارێک هەڵبژێرە بۆ لێخوڕین</h1>
-        <div class="map-select-container">
+        <div class="grid-container">
             <div class="card" onclick="startGame('Sulaymaniyah')">
                 <h3>سلێمانی</h3>
-                <p>شاغۆڵ، ئەزمەڕ و بازاڕ</p>
+                <p>شەقام و باڵەخانەکانی سلێمانی</p>
             </div>
             <div class="card" onclick="startGame('Erbil')">
                 <h3>هەولێر</h3>
@@ -201,20 +229,20 @@
     <div id="game-container" class="hidden">
         <div id="hud">خێرایی: <span id="speed">0</span> km/h</div>
         
-        <!-- Controls: Left for Steering (⬅️➡️) -->
+        <!-- Controls: Left Side for Steering (⬅️➡️) -->
         <div class="controls-left">
             <div class="ctrl-btn" ontouchstart="setSteering(-1)" ontouchend="setSteering(0)" onmousedown="setSteering(-1)" onmouseup="setSteering(0)">⬅️</div>
             <div class="ctrl-btn" ontouchstart="setSteering(1)" ontouchend="setSteering(0)" onmousedown="setSteering(1)" onmouseup="setSteering(0)">➡️</div>
         </div>
 
-        <!-- Controls: Right for Throttle/Brake (⬆️⬇️) -->
+        <!-- Controls: Right Side for Throttle/Brake (⬆️⬇️) -->
         <div class="controls-right">
             <div class="ctrl-btn" ontouchstart="setThrottle(1)" ontouchend="setThrottle(0)" onmousedown="setThrottle(1)" onmouseup="setThrottle(0)">⬆️</div>
             <div class="ctrl-btn" ontouchstart="setThrottle(-1)" ontouchend="setThrottle(0)" onmousedown="setThrottle(-1)" onmouseup="setThrottle(0)">⬇️</div>
         </div>
     </div>
 
-    <!-- Three.js for 3D Graphics -->
+    <!-- Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         let music = document.getElementById('bg-music');
@@ -227,9 +255,6 @@
         function toggleSettings() {
             document.getElementById('main-menu').classList.toggle('hidden');
             document.getElementById('settings-screen').classList.toggle('hidden');
-        }
-        function closeSettings() {
-            toggleSettings();
         }
         function toggleAudio() {
             if (music.paused) {
@@ -250,9 +275,6 @@
             document.getElementById('car-screen').classList.add('hidden');
             document.getElementById('map-screen').classList.remove('hidden');
         }
-        function selectMap(map) {
-            selectedMapType = map;
-        }
 
         function setThrottle(val) { throttle = val; }
         function setSteering(val) { steering = val; }
@@ -268,29 +290,28 @@
 
         function init3DGame() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(selectedMapType === 'Sulaymaniyah' ? 0x87ceeb : 0xffeaa7);
+            scene.background = new THREE.Color(selectedMapType === 'Sulaymaniyah' ? 0x1e272e : 0x2f3640);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById('game-container').appendChild(renderer.domElement);
 
-            // Light
             let ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
             let dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
             dirLight.position.set(10, 20, 10);
             scene.add(dirLight);
 
-            // Ground / Road
+            // Ground
             let groundGeo = new THREE.PlaneGeometry(1000, 1000);
-            let groundMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+            let groundMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
             let ground = new THREE.Mesh(groundGeo, groundMat);
             ground.rotation.x = -Math.PI / 2;
             scene.add(ground);
 
-            // City Buildings (Simulating Erbil/Sulaymaniyah Architecture)
-            let buildingMat = new THREE.MeshStandardMaterial({ color: 0x95a5a6 });
+            // Buildings
+            let buildingMat = new THREE.MeshStandardMaterial({ color: 0x57606f });
             for(let i = -50; i <= 50; i += 15) {
                 let bHeight = Math.random() * 20 + 10;
                 let bGeo = new THREE.BoxGeometry(8, bHeight, 8);
@@ -303,9 +324,9 @@
                 scene.add(bMesh2);
             }
 
-            // Player Car Model
+            // Car Model
             let carGeo = new THREE.BoxGeometry(2, 1, 4);
-            let carColor = selectedCarType === 'BMW' ? 0x2c3e50 : (selectedCarType === 'Camry' ? 0xecf0f1 : 0xe67e22);
+            let carColor = selectedCarType === 'BMW' ? 0x3498db : (selectedCarType === 'Camry' ? 0xf1f2f6 : 0xe67e22);
             let carMat = new THREE.MeshStandardMaterial({ color: carColor });
             carMesh = new THREE.Mesh(carGeo, carMat);
             carMesh.position.set(0, 0.5, 0);
@@ -319,9 +340,8 @@
             if (!isPlaying) return;
             requestAnimationFrame(animate);
 
-            // Physics & Handling (GTA SA Style acceleration & weight response)
             carSpeed += throttle * 0.1;
-            carSpeed *= 0.98; // Friction
+            carSpeed *= 0.98;
 
             if (carSpeed > 1.2) carSpeed = 1.2;
             if (carSpeed < -0.4) carSpeed = -0.4;
@@ -334,7 +354,6 @@
             carMesh.position.x += Math.sin(angle) * carSpeed;
             carMesh.position.z += Math.cos(angle) * carSpeed;
 
-            // Camera follow
             camera.position.x = carMesh.position.x - Math.sin(angle) * 8;
             camera.position.z = carMesh.position.z - Math.cos(angle) * 8;
             camera.position.y = carMesh.position.y + 4;
