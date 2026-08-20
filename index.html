@@ -1,295 +1,129 @@
-<!DOCTYPE html>
-<html lang="ckb" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kurdish GTA SA - CJ & BMX Style - By Aro Bestoon</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; user-select: none; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #050505; color: #fff; }
-        .screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: linear-gradient(135deg, #0f172a, #1e1b4b); z-index: 10; padding: 20px;
-        }
-        .hidden { display: none !important; }
-        h1 { font-size: 2.5rem; margin-bottom: 15px; color: #f1c40f; text-align: center; text-shadow: 2px 2px 10px rgba(0,0,0,0.9); font-weight: 900; }
-        .author-text {
-            font-size: 1.2rem; margin-bottom: 30px; color: #00e1D9; background: rgba(0, 0, 0, 0.7);
-            border: 2px solid #00e1D9; padding: 8px 30px; border-radius: 40px; box-shadow: 0 0 15px rgba(0, 225, 217, 0.4); font-weight: bold;
-        }
-        .btn {
-            background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: 2px solid #fff;
-            padding: 15px 45px; font-size: 1.2rem; font-weight: bold; border-radius: 12px; cursor: pointer;
-            margin: 10px; transition: 0.3s; box-shadow: 0 5px 20px rgba(231, 76, 60, 0.5); width: 280px; text-align: center;
-        }
-        .btn:hover { transform: scale(1.05); }
-        #game-container { width: 100%; height: 100%; position: relative; }
-        canvas { display: block; width: 100%; height: 100%; }
-        
-        .controls-left { position: absolute; bottom: 25px; left: 25px; display: flex; gap: 15px; z-index: 5; }
-        .controls-right { position: absolute; bottom: 25px; right: 25px; display: flex; flex-direction: column; gap: 12px; z-index: 5; }
-        .ctrl-btn {
-            width: 70px; height: 70px; background: rgba(0, 0, 0, 0.65); border: 3px solid rgba(255, 255, 255, 0.85);
-            border-radius: 50%; font-size: 1.8rem; color: white; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; backdrop-filter: blur(5px); box-shadow: 0 5px 15px rgba(0,0,0,0.6);
-        }
-        .ctrl-btn:active { background: rgba(241, 196, 15, 0.85); transform: scale(0.92); }
-        
-        #action-btn {
-            position: absolute; bottom: 110px; right: 35px; width: 85px; height: 85px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8); border: 3px solid #fff; border-radius: 50%;
-            font-size: 0.85rem; font-weight: bold; color: white; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 5; box-shadow: 0 5px 20px rgba(37, 99, 235, 0.6); text-align: center;
-        }
-        #hud {
-            position: absolute; top: 20px; right: 20px; font-size: 1.1rem; font-weight: bold;
-            background: rgba(0, 0, 0, 0.8); border: 2px solid #f1c40f; padding: 10px 20px;
-            border-radius: 10px; z-index: 5; color: #f1c40f; direction: ltr;
-        }
-    </style>
-</head>
-<body>
+import time
+import schedule
+import requests
+import feedparser
+from deep_translator import GoogleTranslator
 
-    <audio id="bg-music" loop>
-        <source src="https://ia801502.us.archive.org/15/items/KurdishMusic/HassanZirak.mp3" type="audio/mp3">
-    </audio>
+TELEGRAM_BOT_TOKEN = '8760352008:AAEAMs8aU3ZzgJrVNpFWLi-Tg_j2KCSbU9U'
 
-    <div id="main-menu" class="screen">
-        <h1>یاری کوردی (GTA SA - CJ & BMX)</h1>
-        <div class="author-text">دروست کراوە لە لایەن ئارۆ بێستون</div>
-        <button class="btn" onclick="startGame()">دەستپێک / Start Game</button>
-    </div>
+SOURCES = {
+    "Investing Live": "https://www.investing.com/rss/news_25.rss",
+    "Forex Factory": "https://www.forexfactory.com/news/rss"
+}
 
-    <div id="game-container" class="hidden">
-        <div id="hud">Mode: <span id="mode-text">پیادە (CJ)</span> | Speed: <span id="speed">0</span></div>
-        
-        <div id="action-btn" onclick="toggleEnterExit()">سوار / دابەزین</div>
+sent_news = set()
+USERS_FILE = 'users.txt'
 
-        <div class="controls-left">
-            <div class="ctrl-btn" ontouchstart="setMove(-1, 0)" ontouchend="setMove(0, 0)" onmousedown="setMove(-1, 0)" onmouseup="setMove(0, 0)">⬅️</div>
-            <div class="ctrl-btn" ontouchstart="setMove(1, 0)" ontouchend="setMove(0, 0)" onmousedown="setMove(1, 0)" onmouseup="setMove(0, 0)">➡️</div>
-        </div>
+def load_users():
+    try:
+        with open(USERS_FILE, 'r') as f:
+            return set(line.strip() for line in f if line.strip())
+    except FileNotFoundError:
+        return set()
 
-        <div class="controls-right">
-            <div class="ctrl-btn" ontouchstart="setMove(0, 1)" ontouchend="setMove(0, 0)" onmousedown="setMove(0, 1)" onmouseup="setMove(0, 0)">⬆️</div>
-            <div class="ctrl-btn" ontouchstart="setMove(0, -1)" ontouchend="setMove(0, 0)" onmousedown="setMove(0, -1)" onmouseup="setMove(0, 0)">⬇️</div>
-        </div>
-    </div>
+def save_user(chat_id):
+    users = load_users()
+    if str(chat_id) not in users:
+        with open(USERS_FILE, 'a') as f:
+            f.write(f"{chat_id}\n")
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        let music = document.getElementById('bg-music');
-        let scene, camera, renderer;
-        let bmxGroup, cjGroup;
-        let leftLeg, rightLeg; 
-        let isDriving = false; // ئایا لەسەر پاسکیلە یان نا
-        let moveX = 0, moveY = 0, bmxSpeed = 0;
-        let isPlaying = false, walkCycle = 0;
+def send_telegram_message_to_all(message):
+    users = load_users()
+    for chat_id in users:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        payload = {'chat_id': chat_id, 'text': message, 'parse_mode': 'Markdown'}
+        try:
+            requests.post(url, json=payload, timeout=10)
+        except Exception as e:
+            print(f"Telegram Error for {chat_id}: {e}")
 
-        function startGame() {
-            music.play().catch(e => {});
-            document.getElementById('main-menu').classList.add('hidden');
-            document.getElementById('game-container').classList.remove('hidden');
-            initWorld();
-            isPlaying = true;
-            animate();
-        }
+# بە شێوازێکی زۆر پاک، هەرکەسێک /start بنووسێت تەنها جارێک لەسەرخۆ تۆماری دەکات
+def register_new_users():
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            for result in data.get('result', []):
+                message = result.get('message', {})
+                chat_id = message.get('chat', {}).get('id')
+                text = message.get('text', '')
+                
+                if chat_id and text == '/start':
+                    users = load_users()
+                    if str(chat_id) not in users:
+                        save_user(chat_id)
+                        # ناردنی پەیامی بەخێرهاتن بۆ یەک جار
+                        welcome_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+                        welcome_payload = {
+                            'chat_id': chat_id, 
+                            'text': "سڵاو! بۆتەکە سەرکەوتووانە چالاک بوو و هەواڵە ئابوورییەکانت بۆ دەنێرێت. 📊"
+                        }
+                        requests.post(welcome_url, json=welcome_payload, timeout=10)
+    except Exception as e:
+        print(f"Error registering users: {e}")
 
-        function setMove(x, y) { moveX = x; moveY = y; }
+def initialize_rss():
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+    for source_name, url in SOURCES.items():
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                feed = feedparser.parse(response.content)
+                if feed.entries:
+                    sent_news.add(feed.entries[0].link)
+        except Exception as e:
+            print(f"Init error {source_name}: {e}")
 
-        function initWorld() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0f1d);
+def check_sources():
+    print("Checking markets for live news...")
+    register_new_users()
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+    
+    for source_name, url in SOURCES.items():
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                feed = feedparser.parse(response.content)
+                if feed.entries:
+                    latest = feed.entries[0]
+                    link = latest.link
+                    title = latest.title
+                    
+                    if link not in sent_news:
+                        sent_news.add(link)
+                        
+                        try:
+                            kurdish_title = GoogleTranslator(source='auto', target='ckb').translate(title)
+                        except:
+                            kurdish_title = title
+                        
+                        message = (
+                            f"🚨 *Aro B news - هەواڵی نوێ ({source_name})*\n\n"
+                            f"📌 **{kurdish_title}**\n\n"
+                            f"🔗 [تەواوی بابەتەکە بخوێنەوە]({link})\n\n"
+                            f"----------------------------------\n"
+                            f"هەواڵ و شیکاری ئابووری 📊\n"
+                            f"Aro B news"
+                        )
+                        
+                        send_telegram_message_to_all(message)
+                        print(f"New news sent from {source_name}!")
+            else:
+                print(f"Failed to fetch {source_name}, status code: {response.status_code}")
+        except Exception as e:
+            print(f"Error checking {source_name}: {e}")
 
-            camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2000);
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.getElementById('game-container').appendChild(renderer.domElement);
+# ئامادەکردنی سەرەتایی RSS
+initialize_rss()
 
-            scene.add(new THREE.AmbientLight(0xffffff, 1.0));
-            let dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-            dirLight.position.set(40, 80, 40);
-            scene.add(dirLight);
+schedule.every(1).minutes.do(check_sources)
+print("Aro B News Pro Bot is running smoothly...")
 
-            // زمین و جادەی سەرەکی
-            let ground = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshStandardMaterial({ color: 0x111827 }));
-            ground.rotation.x = -Math.PI / 2;
-            scene.add(ground);
-
-            let road = new THREE.Mesh(new THREE.PlaneGeometry(20, 4000), new THREE.MeshStandardMaterial({ color: 0x1f2937 }));
-            road.rotation.x = -Math.PI / 2;
-            road.position.y = 0.02;
-            scene.add(road);
-
-            // دروستکردنی دیوار و خانوو و باڵەخانەکانی لای جادە (Grove Street Style)
-            let wallMat = new THREE.MeshStandardMaterial({ color: 0x9ca3af, roughness: 0.8 });
-            let houseMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.6 });
-            let glassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, metalness: 0.9 });
-
-            for(let z = -1000; z <= 1000; z += 50) {
-                // دیوار لە لای چەپ و ڕاست
-                let wallL = new THREE.Mesh(new THREE.BoxGeometry(2, 4, 30), wallMat);
-                wallL.position.set(-14, 2, z);
-                scene.add(wallL);
-
-                let wallR = new THREE.Mesh(new THREE.BoxGeometry(2, 4, 30), wallMat);
-                wallR.position.set(14, 2, z);
-                scene.add(wallR);
-
-                // خانووی دەوروبەر
-                let houseL = new THREE.Mesh(new THREE.BoxGeometry(15, 10, 25), houseMat);
-                houseL.position.set(-25, 5, z);
-                scene.add(houseL);
-            }
-
-            // باڵەخانەی شوشەیی بەرز لە دوورەوە
-            for(let i = -200; i <= 200; i += 40) {
-                if(Math.abs(i) < 40) continue;
-                let h = Math.random() * 60 + 40;
-                let tower = new THREE.Mesh(new THREE.BoxGeometry(20, h, 20), glassMat);
-                tower.position.set(i, h/2, -150);
-                scene.add(tower);
-            }
-
-            // دروستکردنی پاسکیلی BMX (ڕەنگ زەرد وەک ویدیوکە)
-            bmxGroup = new THREE.Group();
-            let bmxFrame = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.6, 2.0), new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8 }));
-            bmxFrame.position.y = 0.7;
-            bmxGroup.add(bmxFrame);
-            
-            let wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 16);
-            let wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
-            let w1 = new THREE.Mesh(wheelGeo, wheelMat); w1.rotation.z = Math.PI/2; w1.position.set(0, 0.35, 1.0); bmxGroup.add(w1);
-            let w2 = new THREE.Mesh(wheelGeo, wheelMat); w2.rotation.z = Math.PI/2; w2.position.set(0, 0.35, -1.0); bmxGroup.add(w2);
-            
-            bmxGroup.position.set(0, 0, 5);
-            scene.add(bmxGroup);
-
-            // دروستکردنی کەسایەتی CJ (سەر، تیشێرت، پانتۆڵ، قاچ و دەست)
-            cjGroup = new THREE.Group();
-            let skinMat = new THREE.MeshStandardMaterial({ color: 0x8d5524 });
-            let shirtMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc }); // تیشێرتی سپی CJ
-            let jeansMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8 }); // پانتۆڵی جینزی شین
-
-            let head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), skinMat);
-            head.position.y = 1.65;
-            cjGroup.add(head);
-
-            let torso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.7, 0.3), shirtMat);
-            torso.position.y = 1.15;
-            cjGroup.add(torso);
-
-            let leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), shirtMat);
-            leftArm.position.set(-0.4, 1.15, 0);
-            cjGroup.add(leftArm);
-
-            let rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.6, 0.18), shirtMat);
-            rightArm.position.set(0.4, 1.15, 0);
-            cjGroup.add(rightArm);
-
-            leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.7, 0.22), jeansMat);
-            leftLeg.position.set(-0.15, 0.45, 0);
-            cjGroup.add(leftLeg);
-
-            rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.7, 0.22), jeansMat);
-            rightLeg.position.set(0.15, 0.45, 0);
-            cjGroup.add(rightLeg);
-
-            cjGroup.position.set(0, 0, 0);
-            scene.add(cjGroup);
-        }
-
-        function toggleEnterExit() {
-            if (isDriving) {
-                // دابەزین لە پاسکیل
-                isDriving = false;
-                cjGroup.position.set(bmxGroup.position.x + 1.5, 0, bmxGroup.position.z);
-                cjGroup.rotation.y = bmxGroup.rotation.y;
-                cjGroup.visible = true;
-                document.getElementById('mode-text').innerText = "پیادە (CJ)";
-            } else {
-                // سواربوون لە پاسکیل ئەگەر نزیک بێت
-                let dist = cjGroup.position.distanceTo(bmxGroup.position);
-                if (dist < 5) {
-                    isDriving = true;
-                    cjGroup.visible = false;
-                    document.getElementById('mode-text').innerText = "سواری پاسکیل (BMX)";
-                } else {
-                    alert("پاسکیلەکە دوورە لێتەوە!");
-                }
-            }
-        }
-
-        function animate() {
-            if (!isPlaying) return;
-            requestAnimationFrame(animate);
-
-            if (isDriving) {
-                // شۆفێری پاسکیل (BMX)
-                bmxSpeed += moveY * 0.1;
-                bmxSpeed *= 0.94;
-                if (bmxSpeed > 1.4) bmxSpeed = 1.4;
-                if (bmxSpeed < -0.4) bmxSpeed = -0.4;
-
-                if (moveX !== 0 && Math.abs(bmxSpeed) > 0.03) {
-                    bmxGroup.rotation.y += moveX * 0.05 * (bmxSpeed > 0 ? 1 : -1);
-                }
-
-                let angle = bmxGroup.rotation.y;
-                bmxGroup.position.x += Math.sin(angle) * bmxSpeed;
-                bmxGroup.position.z += Math.cos(angle) * bmxSpeed;
-
-                // کامێرا دوای پاسکیل دەکەوێت
-                let targetX = bmxGroup.position.x - Math.sin(angle) * 8;
-                let targetZ = bmxGroup.position.z - Math.cos(angle) * 8;
-                camera.position.x += (targetX - camera.position.x) * 0.15;
-                camera.position.y = bmxGroup.position.y + 3.5;
-                camera.position.z += (targetZ - camera.position.z) * 0.15;
-                camera.lookAt(bmxGroup.position.x, bmxGroup.position.y + 1, bmxGroup.position.z);
-
-                document.getElementById('speed').innerText = Math.round(Math.abs(bmxSpeed) * 40) + " km/h";
-            } else {
-                // پیاسەکردنی CJ و جووڵەی قاچ و دەستەکانی
-                let walkSpeed = 0.1;
-                if (moveY !== 0) {
-                    cjGroup.position.x += Math.sin(cjGroup.rotation.y) * moveY * walkSpeed;
-                    cjGroup.position.z += Math.cos(cjGroup.rotation.y) * moveY * walkSpeed;
-
-                    walkCycle += 0.2;
-                    leftLeg.rotation.x = Math.sin(walkCycle) * 0.6;
-                    rightLeg.rotation.x = -Math.sin(walkCycle) * 0.6;
-                } else {
-                    leftLeg.rotation.x = 0;
-                    rightLeg.rotation.x = 0;
-                }
-
-                if (moveX !== 0) {
-                    cjGroup.rotation.y -= moveX * 0.05;
-                }
-
-                // کامێرا دوای CJ دەکەوێت
-                let pX = cjGroup.position.x - Math.sin(cjGroup.rotation.y) * 5;
-                let pZ = cjGroup.position.z - Math.cos(cjGroup.rotation.y) * 5;
-                camera.position.x += (pX - camera.position.x) * 0.15;
-                camera.position.y = cjGroup.position.y + 2.2;
-                camera.position.z += (pZ - camera.position.z) * 0.15;
-                camera.lookAt(cjGroup.position.x, cjGroup.position.y + 1.2, cjGroup.position.z);
-
-                document.getElementById('speed').innerText = "0 km/h";
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        window.addEventListener('resize', () => {
-            if(camera && renderer) {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-        });
-    </script>
-</body>
-</html>
+while True:
+    schedule.run_pending()
+    time.sleep(1)
